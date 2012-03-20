@@ -1,0 +1,2 @@
+version 1.0.2
+- In function view of BetaMixture class, the width of fitted curves is reduced to 3.

@@ -1,0 +1,640 @@
+%\VignetteIndexEntry{Main vignette:Posterior association network and enriched functional gene modules inferred from rich phenotypes of gene perturbations}
+%\VignetteKeywords{Posterior association network, gene modules, rich phenotypes, gene perturbation}
+%\VignettePackage{PAN}
+\documentclass[12pt]{article}
+\usepackage{amsmath}
+
+\usepackage[pdftex]{graphicx} % more modern
+%\usepackage{epsfig} % less modern
+\usepackage{subfigure} 
+\renewcommand{\thesubfigure}{(\Alph{subfigure})}
+\usepackage{layouts}
+\usepackage{bm}
+
+%\usepackage{subfig}
+\usepackage{color}
+\definecolor{darkblue}{rgb}{0.0,0.0,0.75}
+\usepackage[%
+baseurl={http://www.bioconductor.org},%
+pdftitle={PAN},%
+pdfauthor={Xin Wang},%
+pdfsubject={PAN},%
+pdfkeywords={Bioconductor},%
+pagebackref,bookmarks,colorlinks,linkcolor=darkblue,citecolor=darkblue,%
+pagecolor=darkblue,raiselinks,pdftex]{hyperref}
+
+\SweaveOpts{keep.source=TRUE,eps=FALSE,include=FALSE,width=4,height=4.5} 
+\newcommand{\Robject}[1]{\texttt{#1}}
+\newcommand{\Rpackage}[1]{\textit{#1}}
+\newcommand{\Rfunction}[1]{\textit{#1}}
+\newcommand{\Rclass}[1]{\textit{#1}}
+\newcommand{\pan}{\emph{\sffamily PAN} }
+\bibliographystyle{unsrt}
+
+\title{Vignette for \pan: Posterior association network and enriched functional gene modules inferred from rich phenotypes of gene perturbations}
+\author{Xin Wang, Roland F. Schwarz, Mauro Castro \\ Klaas W. Mulder and Florian Markowetz}
+
+\begin{document}
+\maketitle
+\tableofcontents
+
+<<Ropts, echo=FALSE, results=hide>>=
+options(width=70)
+@ 
+
+\section{Introduction}
+An important goal of systems biology is to understand how genes act in concert with each other as functional modules to control a biological function or get involved in a biological process.
+Large-scale gene silencing coupled with rich phenotypic screening paves the road towards a systematic understanding of gene functions as well as their interactions.
+Notably, regardless of particular screening technology and phenotypes selected (e.g. biochemical marker \cite{Mulder2011}, cell morphologies \cite{Bakal2007}, tissue architectures \cite{green2011high}), associations such as correlation coefficients between phenotypic profiles of genes are widely used to investigate their functional interactions \cite{Bakal2007, green2011high, fuchs2010clustering}.
+
+However, predicting an association network has two big challenges: (a) how to make a statistically meaningful cutoff to select significant interactions from the densely connected network; (b) how to incorporate prior knowledge about functional interactions.
+In this paper, we propose an efficient Bayesian mixture modelling approach to address these two challenges.
+We quantify the statistical significance of functional connections between genes by performing a beta-mixture modelling of gene associations. 
+We employ a stratification strategy to take into consideration potential prior knowledge for the functional network such as protein-protein interactions.
+
+To fit the beta-mixture model to screening data, we perform MAP (maximum \textit{a posteriori}) inference based on the EM algorithm \cite{dempster1977maximum}. 
+The algorithm alternates between computing the expectation of the log-posterior probability based on the current estimates for the latent variables and maximizing the expected log-posterior. 
+Having estimated the parameters in the beta-mixture model, we compute posterior probabilities for each gene pair belonging to the positive, negative or lack of association component. 
+To perform a model selection for each edge, a signal-to-noise ratio (SNR), the posterior odds in favor of signal (association) to noise (lack of association), is computed. 
+
+All bioinformatic steps to infer a PAN are realised in the \pan package, which includes essentially two S4 classes for beta-mixture modelling and network inference, respectively. 
+The rest of the viegnette is arranged in the following order:
+\begin{itemize}
+\item To begin, we take a brief overview of the package. We introduce the workflow to infer a posterior association network and gene modules starting from rich phenotyping screens.
+\item Second, we introduce the methods and algorithm for \pan.
+\item Third, we conduct a case study using the data set from Bakal et al. 2007 \cite{Bakal2007} to demonstrate how to use the package step by step.
+\item Finally, we demonstrate another application on the data set from Mulder 2011 \cite{Mulder2011}.  
+\end{itemize}
+
+\section{An overview of PAN}
+The workflow of \pan is illustrated in Figure~\ref{fig:overview}.
+
+\begin{figure}[tp]
+\begin{center}
+\includegraphics[width=0.96\textwidth]{overview.png}
+\caption{\label{fig:overview}%
+{\bf The workflow of \pan.} \pan can be applied to a variety of phenotyping screens such as gene expression(a\cite{ivanova2006dissecting}), cell morphologies(b\cite{fuchs2010clustering}), tissue architectures(c\cite{green2011high}), etc.}
+\end{center}
+\end{figure}
+
+\pan takes as input various types of rich phenotyping screens such as gene expressions, cell morphologies, etc. following gene silencing experiments \cite{ivanova2006dissecting, fuchs2010clustering, green2011high}. 
+The input data is supposed to be preprocessed and summarized (e.g. by using \Rpackage{cellHTS2} or other user-defined methods such as \cite{Bakal2007}).
+The preprocessed data should be a numeric matrix with rows and columns corresponding to genes and phenotypes (or conditions).
+
+\paragraph{Quantifying gene associations} 
+A conventional way to quantify the functional association between two genes is to compute the similarity between their phenotypes based on correlation coefficients (e.g. \cite{fuchs2010clustering}).
+\pan prefers the uncentered correlation coefficient (also known as cosine similarity), which was described as a function that considers both magnitude and direction \cite{eisen1998cluster}.
+It has been proven to be a highly desirable metric for exploring gene expression patterns \cite{eisen1998cluster, dadgostar2002cooperation, de2002comparison}.
+Thus, we will focus on cosine similarities throughout this manual.
+
+\paragraph{Beta-mixture modelling} 
+\pan conducts beta-mixture modelling on association densities to quantify the significances of gene interactions. 
+Specifically, for each pair of genes we compute a posterior probabily for it belonging to the positive (`+'), negative (`-') association or lack of association (`$\times$') component of a beta-mixture distribution.
+We also extend the original model to allow incorporation of possible prior knowledge of functional associations such as protein-protein interactions.
+
+\paragraph{Inferring a posterior association network}
+Following the beta-mixture modelling, we formalize a novel gene network--posterior association network (PAN) to represent co-functions between genes inferred from perturbations with respect to studied biological function or process. 
+As the name implies, a PAN encodes \textit{a posteriori} beliefs of functional association types on edges between genes. 
+%A full PAN can be inferred based on the posterior probabilities for gene associations belonging to different mixture components.
+To infer a PAN, we compute posterior odds for each gene pair in favor of signal (the `+' and `-' components) to noise (the `$\times$' component).
+These posterior odds can be used to weigh edges of a PAN, and a cutoff score (e.g. 10) can be selected to exclude non-significant edges.
+
+\paragraph{Searching for significantly enriched functional modules}
+\pan performs hierarchical clustering on second-order similarities, a popular measure of gene modularity, between genes to search for enriched modules. 
+To assess the uncertainty of the clustering analysis, \pan computes a \textit{p}-value for each cluster using multiscale bootstrap resampling powered by \textit{pvclust} \cite{suzuki2006pvclust}.  
+
+As a demonstration, in this vignette, we introduce how to perform these analyses on two types of RNA interference screens \cite{Bakal2007, Mulder2011}. 
+For the other types of phenotyping screens, the users can design their own classes, methods and pipelines very easily based on this package to infer PANs.
+
+\section{Methods}
+\subsection{Quantifying the significance of gene associations}
+\subsubsection{Measuring gene associations}
+We will focus on cosine similarities throughout this vignette, although other centered correlation coefficients can also be used potentially.
+
+Let $\mathbf{X}=[x_{ik}]_{i=1, 2, \cdots, n; k=1, 2, \cdots, r}$ be a matrix of measured phenotypes, in which $n$ and $r$ denote the number of genes and replicates in the experiment, respectively.
+The cosine similarity here between gene $i$ and $j$ is their normalized dot product, namely:
+
+\begin{align}
+c_{ij}=\frac{\mathbf{x}_{i}\cdot\mathbf{x}_{j}}{\Vert \mathbf{x}_{i}\Vert \Vert \mathbf{x}_{j} \Vert}
+\end{align}
+
+A cosine similarity ranges from $-1$ (exactly opposite) to $1$ (exactly the same) with $0$ indicating independence.
+The biological meaning for a positive or negative cosine similarity is that two genes are positively or negatively regulated, affected or functionally related, depending on the type of phenotype measured.
+
+Having quantified the associations between genes, a natural and critical question is how to tell the significance.
+The most conventional solution is to simulate a null distribution of associations using permutations, which is used to perform hypothesis tests with the alternative hypothesis that the studied gene association is significantly different from the null.
+A \textit{p}-value can be computed to assess the statistical significance for each pair of genes being functionally associated.
+Alternatively, we address this challenge by a Bayesian mixture modelling approach. 
+An advantage over permutation tests, as we will demonstrate later in this paper, is that it allows incorporation of \textit{a priori} beliefs on edges.
+
+\subsubsection{Bayesian mixture modelling}\label{edgeinfer}
+Finite mixture models have been used to identify co-expressed genes from gene expression data \cite{mclachlan2000finite}. 
+An efficient methodology was proposed by Ji et al., which models densities of correlation coefficients of gene expression levels by a mixture of a finite number of beta distributions \cite{ji2005applications}. 
+Here, we propose a beta-mixture distribution to model associations of phenotypic readouts of loss-of-function genetic screens to predict functional connections between genes. 
+
+Our motivation for the model came from the observation that the distribution of cosine similarities computed from RNAi screens exhibits three peaks: one at the central and the other two at both tails (Figure~\ref{fig:viewBMfitting}).
+A natural and simple way to model the distribution is to employ a mixture of three beta distributions.
+The biological interpretations for the three mixture components are that they represent positive association (+), negative association (-) and lack of association (x), respectively.
+
+In the following paragraphs, we describe in details the global beta-mixture model, the stratified model for prior incorporation, Bayesian regularization, posterior probabilities and model inference by maximum \textit{a posteriori} estimation. 
+
+\paragraph{Likelihood function}
+
+For simplicity, we denote the set of association scores (e.g. cosine similarities) as $\mathbf{a}^{'}=\lbrace a_{u}^{'}: u=1,2,\cdots,{n \choose 2} \rbrace$.
+To fit the range of beta-distributions, we use linearly transformed scores $\mathbf{a}=\lbrace a_{u}: u=1,2,\cdots,{n \choose 2} \rbrace$, in which $a_u=(a_u^{'}+1)/2$.
+
+We assume that $a_u$ follow a mixture of three beta distributions, namely: 
+\begin{align}
+a_u \sim \sum_{m\in \mathbf{M}} \pi_m f_m(a_u\vert \alpha_m, \beta_m),\ \ \  \mathbf{M}=\lbrace \mbox{`}+\mbox{'}, \mbox{`}-\mbox{'}, \mbox{`}\times\mbox{'} \rbrace\ ,
+\end{align}
+where $f(a_u \vert \alpha_m, \beta_m)$ is a beta density function with $\alpha_m$ and $\beta_m$ as shape parameters.
+
+Let $\mathbf{Z}=[\mathbf{z}_{u}]_{u=1,2,\cdots,n}$ be a matrix of hidden data, where $\mathbf{z}_u=[z_{um}]_{m\in \mathbf{M}}$ is a vector of latent indicator variables for gene $u$, in which:
+\begin{equation}
+z_{um}=\left\{ \begin{array}{rl}
+ 1 &\mbox{ if $a_u$ comes from component $m$} \\
+ 0 &\mbox{ otherwise}
+       \end{array} \right. \ \ .
+\end{equation}
+$\mathbf{z}_u$ is independent and identically distributed according to an three-category multinomial distribution with probabilities $\bm{\pi}=[\pi_{m}]_{m\in \mathbf{M}}$.
+
+The likelihood of the sets of parameter $\bm{\theta}$ and $\bm{\pi}$ given the complete data $\mathbf{a}$ and $\mathbf{Z}$ is:
+\begin{align}\label{likelihood1}
+L(\bm{\pi}, \bm{\theta}; \mathbf{a}, \mathbf{Z}) &= P(\mathbf{a}, \mathbf{Z} \vert \bm{\pi}, \bm{\theta}) \notag \\
+&= \prod_{u=1}^n P(a_u, \mathbf{z}_u \vert \bm{\pi}, \bm{\theta}) \notag \\
+&= \prod_{u=1}^n \prod_{m\in \mathbf{M}} [\pi_{m} f_m(a_u \vert \alpha_m, \beta_m)]^{z_{um}} \notag \\
+%&= \prod_{u=1}^n \prod_{m\in \mathbf{M}} P(a_u, z_{um}=1 \vert \bm{\pi}, \bm{\theta}) \notag \\
+%&= \prod_{u=1}^n \prod_{m\in \mathbf{M}} P(a_u \vert z_{um}=1, \bm{\pi}, \bm{\theta}) P(z_{um}=1 \vert \bm{\pi}, \bm{\theta}) \notag \\
+%&= \prod_{u=1}^n \prod_{m \in \mathbf{M}} [\pi_m f_m(a_u \vert \alpha_m, \beta_m)]^{z_{um}=1}
+\end{align}
+
+The logarithm of the above likelihood is:
+\begin{align}
+l(\bm{\pi}, \bm{\theta}; \mathbf{a}, \mathbf{Z}) = \sum_{u=1}^n \sum_{m\in \mathbf{M}} z_{um}[\log \pi_{m} + \log f_m(a_u \vert \alpha_m, \beta_m)] \ \ .
+\end{align}
+
+Based on the log-likelihood function, Ji et al. proposed an Expectation-Maximization (EM) algorithm \cite{dempster1977maximum} to estimate parameters \cite{ji2005applications}.
+
+\paragraph{Incorporating prior knowledge}
+
+We demonstrated in our manuscript \cite{Mulder2011} that gene pairs with evidences of protein-protein interactions in the nucleus tend to have higher functional associations.
+However, such prior information is ignored in the above global mixture model, which treats every association equally multinomially distributed with the same parameters.
+Inspired by the stratified Gaussian mixture model proposed by Pan et al. for clustering of microarray data \cite{pan2006incorporating}, we extend to a stratified beta mixture model, in which the full set of associations $\mathbf{a}$ is partitioned to disjoint subsets $\lbrace \mathbf{a}_k \rbrace_{k=1, 2, \cdots, d}$ (e.g. subsets of associations with and without PPIs).
+Consequently, the stratified probability density function becomes:
+
+\begin{equation}
+f_{(k)}(a_u; \bm{\Pi}, \bm{\theta})=\sum_{m\in\mathbf{M}} \pi_{km} f_{m}(a_u\vert \alpha_m, \beta_m) \ ,
+\end{equation} 
+
+in which $m\in \mathbf{M}$ specifies the mixture component and $\bm{\Pi}=[\pi_{km}]_{k=1,2,\cdots, d, m\in \mathbf{M}}$ denotes the set of mixture coefficients affiliated with different partition sets.
+
+Correspondingly, we derive the extended log-likelihood: 
+
+\begin{equation}\label{likelihood2}
+l(\bm{\Pi}, \bm{\theta} \vert \mathbf{a}, \mathbf{Z} ) = 
+\sum_{u=1}^n \sum_{m\in \mathbf{M}} z_{um} ( \log \pi_{km}+\log f_m(a_u\vert \alpha_m, \beta_m) ) \ .
+\end{equation}
+
+\paragraph{Bayesian regularization}
+
+To obtain smoother estimates of the parameters and guide the selection of model structures, we perform Bayesian regularization for the mixture model by introducing dirichlet priors for the likelihood: 
+\begin{align}
+P(\bm{\Pi} \vert \bm{\Gamma}^{*})&=\prod_{k=1}^{d} Dir(\bm{\pi}_k \vert \bm{\gamma}_k^{*}) \notag \\
+&\propto \prod_{k=1}^{d} \prod_{m\in \mathbf{M}} \pi_{km}^{\gamma_{km}^{*}-1} \ ,
+\end{align}
+where $\bm{\Gamma}^{*}=[\gamma_{km}^{*}]_{k=1,2,\cdots, d, m\in \mathbf{M}}$ is a matrix of hyperparameters for the dirichlet prior with each row corresponding to a stratum and each column to a mixture component.
+The posterior probability can be written as:
+
+\begin{align}
+P(\bm{\Pi}, \bm{\theta}, \bm{\Gamma}^{*} \vert \mathbf{a}, \mathbf{Z}) &\propto
+P(\mathbf{a}, \mathbf{Z} \vert \bm{\Pi}, \bm{\theta}, \bm{\Gamma}^{*}) P(\bm{\Pi}\vert \bm{\Gamma}^{*}) \notag \\
+&= \prod_{k=1}^{d} P(\mathbf{a}_k \vert \mathbf{Z}_k, \bm{\theta}) P(\mathbf{Z}_k \vert \bm{\pi}_k) P(\bm{\pi}_k \vert \bm{\Gamma}^{*}) \notag \\
+%&\overset{3}{\propto} \prod_{k=1}^{d} \lbrace \prod_{v\in \mathbf{a}_k} \prod_{m \in \mathbf{M}} f^{z_{vm}}_m (a_v\vert \alpha_m, \beta_m) \cdot \notag \\
+%& \ \ \ \ \prod_{m \in \mathbf{M}} \pi_{km}^{\sum_{v\in \mathbf{a}_k} z_{vm}+\gamma_{km}^{*}-1} \rbrace \ .
+&\propto \prod_{k=1}^{d} \lbrace \prod_{v\in \mathbf{a}_k} \prod_{m \in \mathbf{M}} f^{z_{vm}}_m (a_v\vert \alpha_m, \beta_m) \cdot \notag \\
+& \ \ \ \ \prod_{m \in \mathbf{M}} \pi_{km}^{\sum_{v\in \mathbf{a}_k} z_{vm}+\gamma_{km}^{*}-1} \rbrace \ .
+\end{align}
+ 
+The corresponding log-posterior probability is:
+\begin{align}
+\log P(\bm{\Pi}, \bm{\theta}, \bm{\Gamma}^{*} \vert \mathbf{a}, \mathbf{Z}) &= \notag \\
+\sum_{k=1}^{d} \sum_{m\in \mathbf{M}} \lbrace \sum_{v\in \mathbf{a}_k} & z_{vm}\log f_m(a_v\vert \alpha_m, \beta_m) + (\sum_{v\in\mathbf{a}_k} z_{vm}+\gamma_{km}^{*}-1) \log \pi_{km} \rbrace
+%\log P(\bm{\Pi}, \bm{\theta}, \bm{\Gamma}^{*} \vert \mathbf{a}, \mathbf{Z}) & = \notag \\ 
+%\sum_{k=1}^{d} \sum_{m\in \mathbf{M}} \sum_{v\in \mathbf{a}_k} & z_{vm}\log f_m(a_v\vert \alpha_m, \beta_m) + (z_{vm}+\gamma_{km}^{*}-1) \log \pi_{km} \ \ .
+\end{align}
+
+For a dirichlet prior distribution $Dir(\bm{\gamma})$, to specify the hyperparameters we adopt the following decomposition:
+\begin{equation}
+\bm{\gamma}=\gamma_0 \cdot \bm{p},
+\end{equation}
+where $\bm{p}$ is a prior distribution normalized to 1 specifying the prior beliefs towards different mixture components and $\gamma_0$ is a scale parameter specifying the strength of prior beliefs.
+ 
+\paragraph{Posterior probability}
+
+Having estimated the paramters in the beta-mixture model, the posterior probability for association $a_v\in \mathbf{a}_k, k\in \lbrace 0, 1\rbrace$ belonging to the `+', `-' or `$\times$' mixture component can be computed by:
+\begin{align}\label{eq_pp}
+P(z_{vm}=1 \vert a_v, \bm{\Pi}, \bm{\theta}, \bm{\Gamma}^{*}) \propto \pi_{km} f_m(a_v\vert \alpha_m, \beta_m) \ \ .
+\end{align}
+
+\paragraph{Maximum \textit{a posteriori} (MAP) inference}
+
+We propose to perform MAP estimation using a similar EM algirithm as Ji et al., which alternates between computing the expectation of the log-posterior probability based on the current estimates for the latent variables and maximizing the expected log-posterior:
+\begin{itemize}
+\item \textbf{E}xpectation\textbf{-step}: 
+Given currently estimated parameters and latent variables, the expected value of the log-posterior probability is:
+\begin{align}\label{Estep}
+Q(\mathbf{\bm{\Pi}, \bm{\theta}}\vert \mathbf{\Pi}^{(t)}, \bm{\theta}^{(t)}) &=
+E_{\mathbf{Z}\vert \mathbf{a},\mathbf{\Pi}^{(t)}, \bm{\theta}^{(t)}} \log P(\bm{\Pi}, \bm{\theta}, \bm{\Gamma}^{*} \vert \mathbf{a}, \mathbf{Z}) \notag \\
+&=\sum_{k=1}^d \sum_{m\in \mathbf{M}} \lbrace \sum_{v\in \mathbf{a}_k} z^{(t)}_{vm}\log f_m(a_v\vert \alpha_m, \beta_m) + \notag \\
+& \ \ \ \ (\sum_{v\in\mathbf{a}_k} z^{(t)}_{vm}+\gamma_{km}^{*}-1) \log \pi_{km} \rbrace \ \ ,
+\end{align}
+where for association $v \in \mathbf{a}_k$:
+\begin{equation}
+z^{(t)}_{vm}=\frac{\pi_{km}^{(t)} f_m(a_v\vert \alpha_m^{(t)}, \beta_m^{(t)})}{\displaystyle\sum_{m\in\mathbf{M}} \pi_{km}^{(t)} f_m(a_v\vert \alpha_m^{(t)}, \beta_m^{(t)})} \ \ .
+\end{equation}
+\item \textbf{M}aximization\textbf{-step}: 
+Update the estimates for parameter $\bm{\Pi}$ and $\bm{\theta}$ to optimize the expected value in Eq. (\ref{Estep}).
+Derived from the partial derivatives of the Q function with respect to the mixture coefficients, the updating function is obtained as follows:
+\begin{equation}
+%\pi_{km}^{(t+1)}=\frac{\sum_{v\in \mathbf{a}_k} z_{vm}^{(t)}+\gamma_{km}^{*}-1}{\vert \mathbf{a}_k\vert} \ \ ,
+\pi_{km}^{(t+1)}=\frac{\displaystyle\sum_{v\in \mathbf{a}_k} z_{vm}^{(t)}+\gamma_{km}^{*}-1}
+{\vert \mathbf{a}_k\vert + \displaystyle\sum_{m^{'}\in \mathbf{M}} (\gamma_{km^{'}}^{*}-1)} \ \ ,
+\end{equation}
+where $\vert \mathbf{a}_k\vert$ is the length of $\mathbf{a}_k$.
+When $\bm{\gamma}_k^{*}$ is uniformly distributed for $k=1, 2, \cdots, d$, the MAP estimation degenerates to ML estimation.
+
+Due to the difficulty to derive a closed-form expression to estimate the parameters of beta distributions, similar to Ji et al. \cite{ji2005applications} we use the `nlm' function in R \cite{R2011} to fit these parameters numerically.
+\end{itemize}
+
+In practice, our method differs from the global beta-mixture model proposed by Ji et al. in the following aspects:
+\begin{itemize}
+\item The global beta-mixture model proposed by Ji et al. has a challenge to determine the number of beta distributions using a model selection criterion (e.g. AIC, BIC or ICL-BIC).
+We deliberately apply a three-component beta-mixture model to fit association densities of perturbation screens under a very reasonable biological assumption as we discussed before.       
+\item We fit a beta distribution to association scores computed from permuted screening data to fix the mixture component representing lack of association. This strategy can help avoid potential overfitting in the global model.
+\item Our extended stratified mixture model allows integration of prior knowledge such as protein-protein interactions.
+\end{itemize}
+
+\subsection{Posterior association networks}
+
+\subsubsection{Representation}
+
+Let $\mathcal{V}=\lbrace g_i \rbrace$, $i=1, 2, \cdots, n$ be a set of genes being perturbed in an experiment, where $n$ stands for the total number of genes.
+A posterior association network (PAN) $\mathcal{G}_{PAN}=(\mathcal{V}, \mathcal{E})$ is a type of gene network encoding gene functions on vertices ($\mathcal{V}$) and functional connections between genes on edges ($\mathcal{E}=\lbrace e_{ij}: i, j \in \mathcal{V} \rbrace$).
+Importantly, in PANs vertices and edges carry statistical information as well.
+For example, in a PAN for genetic screens, each vertex (gene perturbed) has a corresponding z-score representing its loss of function, whereas each edge encodes \textit{a posteriori} belief on the functional association between two genes.
+These statistical information allows further filtering out non-significant interactions to obtain a sparse network.
+
+\subsubsection{Inference}
+Normally, the PAN inferred from rich phenotyping screens is very dense in edges.
+A further filtering step can be performed on edges to obtain a sparse network with only those significant functional associations.
+To perform a model selection for each edge, a posterior odds for edge $a_u$ between gene $i$ and $j$ in favor of association to lack of association is computed as follows:
+
+\begin{align}\label{PO}
+K_{ij}=K_{u}&=\frac{P(z_{u\mbox{`}\times\mbox{'}}=0 \vert a_u, \bm{\Pi}, \bm{\theta}, \bm{\Gamma}^{*})}{P(z_{u\mbox{`}\times\mbox{'}}=1 \vert a_u, \bm{\Pi}, \bm{\theta}, \bm{\Gamma}^{*})} \ \ .
+\end{align}
+A cutoff score $K_0$ (e.g. 3, 5 or 10) can be set to filter out non-significant edges, guided by the interpretation of Bayes factors by Harold Jeffreys \cite{jeffreys1998theory}.
+The parse PAN obtained can be denoted as $\mathcal{G}_{PAN}^{'}=(\mathcal{V}^{'}, \mathcal{E}^{'})$, where $\mathcal{E}^{'}=\lbrace e_{ij}: K_{ij}> K_0 \rbrace$ and $\mathcal{V}^{'}=\lbrace g_i: g_i\in \mathcal{V}, \exists j\in V\backslash \lbrace i \rbrace: K_{ij}>K_0 \rbrace$
+
+Starting from genetic perturbation screens, the following steps are involved to infer a PAN of significant functional interactions:
+\begin{itemize}
+\item Quantify the statistical significance of gene functions using conventional measures such as z-scores.
+\item Fit a beta-mixture model to association densities and compute posterior probabilities.
+\item Weigh edges by posterior odds in favor of association to lack of association, and exclude non-significant edges by selecting a cutoff.
+\item Determine the sign of each edge by comparing the posterior probabilities for it belonging to the mixture component representing positive and negative associations.
+
+\end{itemize}
+
+\section{Case study I--inferring a functional association network regulating epidermal stem cell fate}
+We develop this model for Mulder et al. to infer an association network of functional interactions between chromatin factors \cite{Mulder2011}.
+The details about how to reproduce data and figures will be added later.
+
+\section{Case study II--inferring a functional association network regulating cell morphology}
+We demonstrate another application of \pan to predicting a functional association network regulating cell morphology in \textit{Drosophila}.
+The data set we use here comes from quantitative cell morphological screening for 249 gene-overexpression or RNAi knock-down treatment conditions by Bakal et al. \cite{Bakal2007}.  
+For each indivisual cell, 145 different geometric features were computed by imaging analysis, and are subsequently scored with neural networks (NNs) trained to discriminate seven reference TCs with distinctive morphologies.
+For each TC, NN z-scores were computed from all scored cells in this TC (more details in \cite{Bakal2007}).
+The data we obtained after all the preprocessing steps is a matrix of NN z-scores with rows and columns corresponding to 249 TCs and seven reference TCs (the data was downloaded from http://arep.med.harvard.edu/QMS in July 2011).
+
+First of all, we load the package and the preprocessed rich phenotypes:
+<<setup, results=hide>>=
+library(PAN)
+data(Bakal2007)
+@ 
+<<dimBakal2007>>=
+dim(Bakal2007)
+@ 
+
+\subsection{Beta-mixture modelling of gene association densities}
+As shown in Figure~\ref{fig:overview}, our first step is to quantify functional gene associations and their statistical significances. 
+We first create an object of S4 class \Rclass{BetaMixture}:
+
+<<newbm, results=hide>>=
+bm1<-new("BetaMixture", pheno=Bakal2007, metric="cosine", 
+model="global", order=1)
+@ 
+
+<<bm1show>>=
+bm1
+@ 
+
+Gene association scores are computed and stored at slot `association' when initiating the object \Robject{bm1}.
+An object can also be created directly from associations when screening data is not available. 
+
+Having obtained an object, we next fit a beta distribution to permuted phenotypes to estimate shape parameters for the `x' (lack of association) component of the mixture model:
+
+<<fitNULL, eval=FALSE>>=
+bm1<-fitNULL(bm1, nPerm=10, thetaNULL=c(alphaNULL=4, betaNULL=4),
+sumMethod="median", permMethod="all", verbose=TRUE)
+@ 
+
+Please note that the S4 method \Rfunction{fitNULL} summarizes estimated parameters from multiple fitting results by taking the median or average values.
+There are two choices for the method to do permutation: to permute all or keep replicate positions. 
+Selecting the latter option will result in a flatter NULL distribution.
+This option is recommended when inputted data consists of multiple replicates for each phenotype to make more conservative model selctions for association types.
+
+The summarized shape parameters in the last step are used to fix the shape of the beta distribution modelling the `x' component. 
+To fit the three-beta mixture model, the user needs to input the following arguments:
+\begin{itemize}
+\item \Robject{para}: initial values for parameter estimation by the EM algorithm (see \cite{dempster1977maximum} for details) including (a) \Robject{zInit}: a [No. of gene associations] x 3 [mixture components] matrix of initial posterior probabilities; (b) \Robject{thetaInit}: a named vector of six numeric values standing for shape parameters; (c) \Robject{gamma}: a [No. of partitions] x 3 [mixture components] matrix of hyperparamers for the dirichlet priors. 
+
+When \Robject{zInit} is set to `NULL', initial values will be generated by assigning $\{a_u: a_u<1/3\}$, $\{a_u: 1/3<a_u<2/3\}$, and $\{a_u: a_u>2/3\}$ to the `-', `x' and `+' component, respectively.
+When \Robject{gamma} is set to `NULL', an uninformative (uniform) dirichlet prior will be automatically applied. 
+However, when the \Robject{gamma} is not `NULL', for each association partition hyperparameters for the corresponding dirichlet prior should be supplied.
+Please note that when \Robject{ctrl\$fitNULL} is set to `TRUE', then \Robject{para\$alphaNULL} and \Robject{para\$betaNULL} are supposed to be filled in the estimated parameters from the fitting of the `x' component.
+\item \Robject{ctrl}: control arguments for the EM algorithm including (a) \Robject{fitNULL}: specifying whether or not the `x' component needs to be fitted; (b) \Robject{tol}: the tolerence of the EM algorithm; (c) \Robject{maxIter}: the maximal number of iterations.
+\item since \pan uses function \Rfunction{nlm} to estimate shape parameters of beta distributions, the other arguments of \Rfunction{nlm} are also allowed to be inputted to control the mixture model fitting.
+\end{itemize}
+
+For the case study, we fit the mixture model using the following code:
+<<fitBM, eval=FALSE>>=
+bm1<-fitBM(bm1, para=list(zInit=NULL, thetaInit=c(alphaNeg=2, 
+betaNeg=4, alphaNULL=bm1@result$fitNULL$thetaNULL[["alphaNULL"]], 
+betaNULL=bm1@result$fitNULL$thetaNULL[["betaNULL"]], 
+alphaPos=4, betaPos=2), gamma=NULL), 
+ctrl=list(fitNULL=FALSE, tol=1e-1), verbose=TRUE, gradtol=1e-3)
+@ 
+
+\pan provides a function to visualize the fitting results so that the user can investigate if or not there is a good fitting of the model to their data.
+
+<<loadBM1, echo=FALSE, results=hide>>=
+data(bm)
+@ 
+
+To view the fitting of the lack of association component: 
+
+<<viewNULLfitting, fig=TRUE, width=8, height=8, results=hide>>=
+view(bm1, "fitNULL")
+@ 
+
+\begin{figure}[tp]
+\begin{center}
+\includegraphics{PAN-Vignette-viewNULLfitting}
+\caption{\label{fig:viewNULLfitting}%
+  Fitting of the distribution representing lack of association to permuted data.}
+\end{center}
+\end{figure}
+
+As shown in Fig. \ref{fig:viewNULLfitting}, we obtain a good fitting of a beta distribution (green dashed curve of beta probability density) to association densities of the permuted data (gray density curves).
+
+Similarly, the same function can be used to inspect the fitting of the beta-mixture model:
+
+<<viewBMfitting, fig=TRUE, width=8, height=8, results=hide>>=
+view(bm1, "fitBM")
+@ 
+
+\begin{figure}[tp]
+\begin{center}
+\includegraphics{PAN-Vignette-viewBMfitting}
+\caption{\label{fig:viewBMfitting}%
+  Fitting of the beta-mixture model.}
+\end{center}
+\end{figure}
+
+We also see a very good fitting of three mixture components (blue, green and red dashed curve corresponds to the `-', `x' and `+' distribution, respectively) to the association densities of real phenotyping screens (Fig. \ref{fig:viewBMfitting}).
+
+\pan provides an S4 method \Rfunction{summarize} to print a summary of an object of class \Rclass{BetaMixture} including input data and parameters, NULL fitting and beta-mixture model fitting results:
+
+<<printBM>>=
+summarize(bm1, what="ALL")
+@ 
+
+\subsection{Inferring a posterior association network}
+Having finished the beta-mixture modelling of association densities of rich phenotyping screens, we obtain for each pair of genes a posterior probability belonging to the mixture components representing positive, negative association or lack of association.
+These posterior probabilities enable us to weigh edges for a \pan using:
+
+\begin{itemize}
+\item simply posterior probabilities for associations belonging to the positive component;
+\item posterior odds in favor of positive association to lack of association or
+\item signal-to-noise ratios defined in Eq. (\ref{PO});
+\end{itemize}
+
+Here we use the last method to weigh edges of a \pan and make a cutoff at 5 (meaning a `substantial' strength of evidence according to the interpretation principles of Bayesian decision making \cite{jeffreys1998theory}) to remove non-significant edges:
+
+<<inferFullPAN, results=hide>>=
+pan<-new("PAN", bm1=bm1)
+pan<-infer(pan, para=list(type="SNR", log=TRUE, sign=TRUE, 
+cutoff=log(5)), filter=FALSE, verbose=TRUE)
+@ 
+
+The S4 method \Rfunction{infer} has an argument \Robject{filter} to filter out genes that have not any significant association with all the others.
+
+\pan provides a method \Rfunction{buildPAN} to build an \Robject{igraph} object with a flexible framework for setting graph attributes. 
+There are two graphics engines provided by \pan: \Rpackage{igraph} and \Rpackage{RedeR}.
+The latter software is more powerful for viewing a complex network or multiple modules at the same time.
+
+<<buildPAN, results=hide>>=
+data(Bakal2007Cluster)
+pan<-buildPAN(pan, engine="RedeR", 
+para=list(nodeColor=nodeColor, hideNeg=TRUE))
+@ 
+
+%<<loadPAN, echo=FALSE, results=hide>>=
+%data(pan)
+%@ 
+
+To view the built graph or modules, we can use the method \Rfunction{viewPAN}:
+ 
+<<visualFullPAN, eval=FALSE>>=
+library(RedeR)
+viewPAN(pan, what="graph")
+@ 
+
+\begin{figure}[tp]
+\begin{center}
+\includegraphics[width=0.98\textwidth]{fullPAN}
+\caption{\label{fig:fullPAN}%
+  Inferred full posterior association network.}
+\end{center}
+\end{figure}
+
+In Figure~\ref{fig:fullPAN}, we highlighted genes (TCs) according to the clustering results in \cite{Bakal2007} (Table S8). 
+We observe a high consistency between our functional network and their clustering results that TCs in the same cluster tend to enrich close to each other in the network.
+
+\subsection{Searching for enriched modules}
+
+\pan performs unsupervised hierarchical clustering to search for modules.
+To quantify statistical significances of modules, \pan employs R package \Rpackage{pvclust} to do multiscale bootstrap resampling \cite{suzuki2006pvclust}.
+Please note that in this case study, to compare with the clustering results with \cite{Bakal2007} we still use first-order cosine similarities to do the clustering.
+
+Parallel computing is supported by \pan powered by R package \Rpackage{snow}:
+
+<<searchpvmodule, eval=FALSE>>=
+library(pvclust)
+options(cluster=makeCluster(4, "SOCK"))
+pan<-pvclustModule(pan, nboot=1000, metric="cosine", hclustMethod=
+"average", filter=TRUE, verbose=TRUE, r=c(5:12/7))
+if(is(getOption("cluster"), "cluster")) {
+	stopCluster(getOption("cluster"))
+	options(cluster=NULL)
+}
+@ 
+
+In the above R codes, the argument \Robject{r} is appended in addition, as it is important for \Rpackage{pvclust} to specify the relative sample sizes of bootstrap replications (more details in \Rfunction{pvclust}).
+Similarly, the user can also append other arguments except \Robject{nboot}, \Robject{metric} and \Robject{hclustMethod} for \Rfunction{pvclust} to achieve the best performance. 
+The argument \Robject{filter} is an option to exclude genes without any significant associations with all the other genes during the module searching.
+
+A method is provided by \pan to retrieve ids for those significant gene modules, given a \textit{p}-value cutoff, the minimal and maximal size cutoffs. 
+The user can choose to sort modules by their sizes or \textit{p}-values in an increasing or decreasing order.   
+Using the same method \Rfunction{viewPAN} with the argument \Robject{what} set to `pvclustModule', the user can view the modules by inputting their ids (Figure~\ref{fig:sigmod}).
+
+<<sigmodules, eval=FALSE>>=
+inds<-sigModules(pan,pValCutoff=0.01, minSize=3, 
+maxSize=100, sortby="pval", decreasing=FALSE)
+@ 
+
+<<visualpvmodule, eval=FALSE>>=
+viewPAN(pan,what="pvclustModule", moduleID=inds)
+@ 
+
+\begin{figure}[tp]
+\begin{center}
+\includegraphics[width=0.98\textwidth]{sigmod}
+\caption{\label{fig:sigmod}%
+  Top significant gene modules.}
+\end{center}
+\end{figure}
+
+The significant modules identified in this step can also be integrated with the inferred PAN.
+Again, we use \Rpackage{RedeR} to visualize gene modules in a hierarchical layout inside the PAN.
+
+<<visualnestedpvmodule, eval=FALSE>>=
+viewNestedModules(pan,pValCutoff=0.05,minSize=3,maxSize=100)
+@ 
+
+\begin{figure}[tp]
+\begin{center}
+\includegraphics[width=0.98\textwidth]{pvmodule}
+\caption{\label{fig:pvmodule}%
+  Significant gene modules found by \Rpackage{pvclust} (\textit{p}-value<0.05).}
+\end{center}
+\end{figure}
+
+Figure~\ref{fig:pvmodule} still presents the inferred \pan, but with all significant gene modules nested in containers (dashed rounded rectangles).
+Positive gene associations inside modules are colored in red, while inter-module associations are summed up and colored in gray.
+Comparing the gene modules found by \pan with clusters identified in \cite{Bakal2007}, we also see a very high consistency.
+For example, the three big clusters responsible for cell adhesion complex formation (colored in yellow), adhesion disassembly (colored in green) and tail retraction (colored in purple and blue) are found to be highly significant modules or tightly connected submodules in our results.
+
+For an object of class \Rclass{PAN}, an S4 method is also provided to print a summary:
+
+<<printPAN>>=
+summarize(pan, what="graph")
+@ 
+
+\section{Session info}
+
+This document was produced using:
+
+<<sessionInfo, results=tex, print=TRUE>>=
+toLatex(sessionInfo())
+@ 
+\renewcommand{\refname}{\section{References}}
+\begin{thebibliography}{1}
+\bibitem{Bakal2007}
+Bakal, C. and Aach, J. and Church, G. and Perrimon, N. (2007).
+\newblock Quantitative morphological signatures define local signaling networks regulating cell morphology.
+\newblock {\em Science\/}, {\bf 316}(5832), 1753.
+
+\bibitem{ji2005applications}
+Ji, Y. and Wu, C. and Liu, P. and Wang, J. and Coombes, K.R. (2005).
+\newblock Applications of beta-mixture models in bioinformatics.
+\newblock {\em Bioinformatics\/}, {\bf 21}(9), 2118.
+
+\bibitem{fuchs2010clustering}
+Fuchs, F. and Pau, G. and Kranz, D. and Sklyar, O. and Budjan, C. and Steinbrink, S. and Horn, T. and Pedal, A. and Huber, W. and Boutros, M. (2010).
+\newblock Clustering phenotype populations by genome-wide RNAi and multiparametric imaging.
+\newblock {\em Molecular systems biology\/}, {\bf 6}(1).
+
+\bibitem{suzuki2006pvclust}
+Suzuki, R. and Shimodaira, H. (2006).
+\newblock Pvclust: an R package for assessing the uncertainty in hierarchical clustering.
+\newblock {\em Bioinformatics\/}, {\bf 22}(12), 1540.
+
+\bibitem{mclachlan2000finite}
+McLachlan, G.J. and Peel, D. (2000).
+\newblock Finite mixture models.
+\newblock {\em Wiley-Interscience\/}, {\bf 299}.
+
+\bibitem{dempster1977maximum}
+Dempster, A.P. and Laird, N.M. and Rubin, D.B. (1977).
+\newblock Maximum likelihood from incomplete data via the EM algorithm.
+\newblock {\em Journal of the Royal Statistical Society. Series B (Methodological)\/}, {\bf 39}(1), 1--38.
+
+\bibitem{lee2004probabilistic}
+Lee, I. and Date, S.V. and Adai, A.T. and Marcotte, E.M. (2004).
+\newblock A probabilistic functional network of yeast genes.
+\newblock {\em Science\/}, {\bf 306}(5701), 1555.
+
+\bibitem{R2011}
+R Development Core Team (2008).
+\newblock R: A Language and Environment for Statistical Computing.
+\newblock {\em http://www.R-project.org\/}, {ISBN} 3-900051-07-0.
+
+
+\bibitem{pan2006incorporating}
+Pan, W. (2006).
+\newblock Incorporating gene functions as priors in model-based clustering of microarray gene expression data.
+\newblock {\em Bioinformatics\/}, {\bf 22}(7), 795.
+
+\bibitem{jeffreys1998theory}
+Jeffreys, H. (1998).
+\newblock Theory of probability.
+\newblock {\em Oxford University Press, USA\/}, 432.     
+
+\bibitem{eisen1998cluster}
+Eisen, M.B. and Spellman, P.T. and Brown, P.O. and Botstein, D. (1998).
+\newblock Cluster analysis and display of genome-wide expression patterns.
+\newblock {\em Proceedings of the National Academy of Sciences\/}, {\bf 95}(25), 14863.
+
+\bibitem{dadgostar2002cooperation}
+Dadgostar, H. and Zarnegar, B. and Hoffmann, A. and Qin, X.F. and Truong, U. and Rao, G. and Baltimore, D. and Cheng, G. (2002).
+\newblock Cooperation of multiple signaling pathways in CD40-regulated gene expression in B lymphocytes.
+\newblock {\em Proceedings of the National Academy of Sciences\/}, {\bf 99}(3), 1497.
+
+\bibitem{Mulder2011}
+Klaas W. Mulder, Xin Wang, Carles Escriu, Yoko Ito, Roland F. Schwarz, Jesse Gillis, Gabor Sirokmany, Giacomo Donati, Santiago Uribe-Lewis, Paul Pavlidis, Adele Murrell, Florian Markowetz and Fiona M. Watt (2011).
+\newblock Diverse epigenetic strategies interact to control epidermal differentiation.
+\newblock {\em submitted\/}.
+
+\bibitem{de2002comparison}
+de Hoon, M. and Imoto, S. and Miyano, S. (2002).
+\newblock A comparison of clustering techniques for gene expression data.
+in \newblock {\em Proc. of the 10th Intl Conf. on Intelligent Systems for Molecular Biology\/}.
+
+\bibitem{ivanova2006dissecting}
+Ivanova, N. and Dobrin, R. and Lu, R. and Kotenko, I. and Levorse, J. and DeCoste, C. and Schafer, X. and Lun, Y. and Lemischka, I.R. (2006).
+\newblock Dissecting self-renewal in stem cells with RNA interference.
+\newblock {\em Nature\/}, {\bf 442}(7102), 533--538.
+
+\bibitem{green2011high}
+Green, R.A. and Kao, H.L. and Audhya, A. and Arur, S. and Mayers, J.R. and Fridolfsson, H.N. and Schulman, M. and Schloissnig, S. and Niessen, S. and Laband, K. and others (2011).
+\newblock A High-Resolution C. elegans Essential Gene Network Based on Phenotypic Profiling of a Complex Tissue.
+\newblock {\em Cell/}, {\bf 145}(3), 470--482.
+
+\bibitem{fuchs2010clustering}
+Fuchs, F. and Pau, G. and Kranz, D. and Sklyar, O. and Budjan, C. and Steinbrink, S. and Horn, T. and Pedal, A. and Huber, W. and Boutros, M. (2010).
+\newblock Clustering phenotype populations by genome-wide RNAi and multiparametric imaging.
+\newblock {\em Molecular systems biology\/}, {\bf 6}(1).
+
+\end{thebibliography}
+
+\end{document}
