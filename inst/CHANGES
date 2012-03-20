@@ -1,0 +1,6 @@
+3-20-2012
+-Renamed package to PANR because PAN package already exists in CRAN
+08-09-2011
+-changed the format of figures for the vignette from pdf to png to reduce the size of the package 
+01-12-2011
+-revised references in help files

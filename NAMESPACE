@@ -1,0 +1,52 @@
+importClassesFrom(methods, character, list, oldClass)
+
+importMethodsFrom(methods, initialize, show)
+
+importFrom(graphics, axis, box, hist, image, layout, lines, mtext, par,
+           plot, plot.new, plot.window, polygon, title)
+
+importFrom(grDevices, colorRampPalette, colors, gray)
+
+importFrom(igraph, E, "E<-", graph.adjacency, layout.random,
+           plot.igraph, subgraph, V, "V<-")
+
+importFrom(MASS, fitdistr)
+
+importFrom(methods, "@<-", is)
+importClassesFrom(methods, className, namedList, listOfMethods,
+ObjectsWithPackage, signature) 
+
+importFrom(pvclust, pvclust)
+
+importFrom(stats, as.dist, cor, dbeta, density, dist, hclust, median,
+           na.omit, nlm, step)
+
+importFrom(utils, assignInNamespace, getFromNamespace,
+           setTxtProgressBar, txtProgressBar)
+           
+exportClasses(
+	"BetaMixture",
+	"PAN"
+)
+export(
+	   "assoScore",
+	   "cosineSim",
+	   "cosineDist"
+	   )
+
+exportMethods(
+	"permNULL",
+	"fitNULL",
+	"fitBM",
+	"infer",
+	"view",
+	"summarize",
+	"viewLegend",
+	"buildPAN",
+	"viewPAN",
+	"exportPAN",
+	"sigModules",
+	"pvclustModule",
+	"viewNestedModules"
+)
+
