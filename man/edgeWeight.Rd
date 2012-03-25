@@ -30,7 +30,7 @@ weights.
 }
 }
 \details{
-This function will be called by \code{\link[PAN:infer]{infer}} to compute edge weights for posterior
+This function will be called by \code{\link[PANR:infer]{infer}} to compute edge weights for posterior
 association networks. When inferring a signed PAN, signal-to-noise ratios
 are suggested to use; while inferring a PAN of only positive associations,
 posterior probability odds or posterior probabilities are preferred.
@@ -48,7 +48,7 @@ screens, in preparation.
 Xin Wang \email{xw264@cam.ac.uk}
 }
 \seealso{
-  \code{\link[PAN:infer]{infer}}
+  \code{\link[PANR:infer]{infer}}
 }
 
 \keyword{internal}

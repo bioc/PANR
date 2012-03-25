@@ -23,7 +23,7 @@ below for details).
 		\item{\code{metric}:}{
 		a character value specifying the metric to compute similarity
 		scores. Currently, 'cosine' and 'correlation' are supported (see
-		\code{\link[PAN:assoScore]{assoScore}} for more details).
+		\code{\link[PANR:assoScore]{assoScore}} for more details).
 		}
 		\item{\code{order}:}{
 		a numeric value specifying the order of the similarity score to
@@ -88,11 +88,11 @@ functional gene modules inferred from rich phenotypic perturbation
 screens, in preparation.
 }
 \seealso{
-  \code{\link[PAN:permNULL]{permNULL}}
-  \code{\link[PAN:fitNULL]{fitNULL}}
-  \code{\link[PAN:fitBM]{fitBM}}
-  \code{\link[PAN:view]{view}}
-  \code{\link[PAN:summarize]{summarize}}
+  \code{\link[PANR:permNULL]{permNULL}}
+  \code{\link[PANR:fitNULL]{fitNULL}}
+  \code{\link[PANR:fitBM]{fitBM}}
+  \code{\link[PANR:view]{view}}
+  \code{\link[PANR:summarize]{summarize}}
 }
 \examples{
 \dontrun{

@@ -25,7 +25,7 @@ extension).
 a character value specifying what to write: `graph' or `pvclustModule'.
 }
 	\item{moduleID}{
-a numeric or integer vector of modules to write (see details in \code{\link[PAN:sigModules]{sigModules}}).
+a numeric or integer vector of modules to write (see details in \code{\link[PANR:sigModules]{sigModules}}).
 }
 	\item{format}{
 a character value specifying the format to write (see more details in \code{\link[igraph:write.graph]{write.graph}}).

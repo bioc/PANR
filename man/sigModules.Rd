@@ -41,7 +41,7 @@ not in use, but only for further extension.
 \details{
 This function facilitates the user to retrieve significant gene modules found 
 by pvclust and obtain their ids, which can be subsequently used for visualization 
-(see \code{\link[PAN:viewPAN]{viewPAN}} for details).  
+(see \code{\link[PANR:viewPAN]{viewPAN}} for details).  
 }
 \value{
 a numeric vector of ids for significant gene modules

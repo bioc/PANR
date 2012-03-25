@@ -32,7 +32,7 @@ screens, in preparation.
 Xin Wang \email{xw264@cam.ac.uk}
 }
 \seealso{
-\code{\link[PAN:assoScore]{assoScore}}
+PANR:\code{\link[PANR:assoScore]{assoScore}}
 }
 \examples{
 toydata<-matrix(rnorm(n=2000, mean=0, sd=4), nrow=100, ncol=20)

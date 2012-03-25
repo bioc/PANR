@@ -62,7 +62,7 @@ screens, in preparation.
 Xin Wang \email{xw264@cam.ac.uk}
 }
 \seealso{
-  \code{\link[PAN:fitBM]{fitBM}}
+  \code{\link[PANR:fitBM]{fitBM}}
 }
 
 \examples{

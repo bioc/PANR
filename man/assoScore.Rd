@@ -59,7 +59,7 @@ screens, in preparation.
 Xin Wang \email{xw264@cam.ac.uk}
 }
 \seealso{
-\code{\link[stats:cor]{cor}}, \code{\link[PAN:cosineSim]{cosineSim}}
+\code{\link[stats:cor]{cor}}, \code{\link[PANR:cosineSim]{cosineSim}}
 }
 \examples{
 toydata<-matrix(rnorm(n=2000, mean=0, sd=4), nrow=100, ncol=20)

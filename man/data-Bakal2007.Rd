@@ -26,7 +26,7 @@ results by Bakal et al.
 \code{nodeColor}: colors scaled according to the clustering 
 results by Bakal et al.
 
-\code{bm1}: an object of \code{\link[PAN:BetaMixture]{BetaMixture}}, 
+\code{bm1}: an object of \code{\link[PANR:BetaMixture]{BetaMixture}}, 
 which includes data and results for beta-mixture modelling 
 on the association densities based on first-order cosine 
 similarities of the phenotyping screens.

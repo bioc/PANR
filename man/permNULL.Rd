@@ -25,7 +25,7 @@ permNULL(object, permMethod="keepRep", ...)
 a matrix of permuted data.
 }
 \seealso{
-\code{\link[PAN:fitNULL]{fitNULL}}, \code{\link[PAN:fitBM]{fitBM}}, \code{\link[PAN:BetaMixture]{BetaMixture}}
+\code{\link[PANR:fitNULL]{fitNULL}}, \code{\link[PANR:fitBM]{fitBM}}, \code{\link[PANR:BetaMixture]{BetaMixture}}
 }
 \references{
 Xin Wang, Roland F. Schwarz, Mauro Castro, Klaas W. Mulder 

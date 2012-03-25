@@ -33,7 +33,7 @@ not in use, only for further extension.
 }
 \details{
 This function employs different edge weights to infer a posterior association
-network (see \code{\link[PAN:edgeWeight]{edgeWeight}} for more details).
+network (see \code{\link[PANR:edgeWeight]{edgeWeight}} for more details).
 Multiple parameters are provided for the user to specify the network:
 
 'type' -  a character value giving the type of edge weights: signal-to-
@@ -63,7 +63,7 @@ screens, in preparation.
 Xin Wang \email{xw264@cam.ac.uk}
 }
 \seealso{
-  \code{\link[PAN:edgeWeight]{edgeWeight}}
+  \code{\link[PANR:edgeWeight]{edgeWeight}}
 }
 
 \examples{

@@ -21,13 +21,13 @@ an object of S4 class \code{PAN}.
 a character value specifying which to show: 'graph' or 'pvclustModule'.
 }
 	\item{moduleID}{
-a numeric or integer vector of modules to view (see details in \code{\link[PAN:sigModules]{sigModules}}).
+a numeric or integer vector of modules to view (see details in \code{\link[PANR:sigModules]{sigModules}}).
 This argument will be applied only when what=`pvclustModule'.
 }
 	\item{layout}{
 a character value specifying the layout method (see details in \code{\link[igraph:layout]{layout}}).
 This argument will be applied only when engine=`igraph' when build a graph
-for PAN using \code{\link[PAN:buildPAN]{buildPAN}}.
+for PAN using \code{\link[PANR:buildPAN]{buildPAN}}.
 }
 	\item{verbose}{
 a logical value to switch on (if \code{TRUE}) or off {if \code{FALSE}} detailed
@@ -40,7 +40,7 @@ not in use, but only for further extension.
 \details{
 This function presents the inferred posterior association network or enriched 
 functional modules in igraph or \code{\link[RedeR:RedeR]{RedeR}} depending on the graphics
-engine used when building the graph for PAN (details in \code{\link[PAN:buildPAN]{buildPAN}}).
+engine used when building the graph for PAN (details in \code{\link[PANR:buildPAN]{buildPAN}}).
 
 Please note that when viewing a dense PAN in `igraph', it could be very
 messy. Multiple modules can be viewed at the same time in `RedeR' powered
@@ -58,7 +58,7 @@ screens, in preparation.
 Xin Wang \email{xw264@cam.ac.uk}
 }
 \seealso{
-  \code{\link[PAN:buildPAN]{buildPAN}}, \code{\link[igraph:layout]{layout}}
+  \code{\link[PANR:buildPAN]{buildPAN}}, \code{\link[igraph:layout]{layout}}
 }
 
 \examples{

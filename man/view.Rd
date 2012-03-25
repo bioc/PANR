@@ -41,8 +41,8 @@ functional gene modules inferred from rich phenotypic perturbation
 screens, in preparation.
 }
 \seealso{
-  \code{\link[PAN:fitNULL]{fitNULL}}
-  \code{\link[PAN:fitNULL]{fitBM}}
+  \code{\link[PANR:fitNULL]{fitNULL}}
+  \code{\link[PANR:fitNULL]{fitBM}}
 }
 
 \examples{

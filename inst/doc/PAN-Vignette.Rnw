@@ -16,9 +16,9 @@
 \definecolor{darkblue}{rgb}{0.0,0.0,0.75}
 \usepackage[%
 baseurl={http://www.bioconductor.org},%
-pdftitle={PAN},%
+pdftitle={PANR},%
 pdfauthor={Xin Wang},%
-pdfsubject={PAN},%
+pdfsubject={PANR},%
 pdfkeywords={Bioconductor},%
 pagebackref,bookmarks,colorlinks,linkcolor=darkblue,citecolor=darkblue,%
 pagecolor=darkblue,raiselinks,pdftex]{hyperref}
@@ -28,7 +28,7 @@ pagecolor=darkblue,raiselinks,pdftex]{hyperref}
 \newcommand{\Rpackage}[1]{\textit{#1}}
 \newcommand{\Rfunction}[1]{\textit{#1}}
 \newcommand{\Rclass}[1]{\textit{#1}}
-\newcommand{\pan}{\emph{\sffamily PAN} }
+\newcommand{\pan}{\emph{\sffamily PANR} }
 \bibliographystyle{unsrt}
 
 \title{Vignette for \pan: Posterior association network and enriched functional gene modules inferred from rich phenotypes of gene perturbations}
@@ -66,7 +66,7 @@ The rest of the viegnette is arranged in the following order:
 \item Finally, we demonstrate another application on the data set from Mulder 2011 \cite{Mulder2011}.  
 \end{itemize}
 
-\section{An overview of PAN}
+\section{An overview of PANR}
 The workflow of \pan is illustrated in Figure~\ref{fig:overview}.
 
 \begin{figure}[tp]

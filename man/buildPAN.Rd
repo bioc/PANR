@@ -37,11 +37,11 @@ can specify:
 
 'nodeColor' and 'nodeSize' - a vector of node colors or sizes. Please note
 that the order of color or size must be concordant with the gene ids in
-the argument \code{pheno} of the object of \code{\link[PAN:BetaMixture]{BetaMixture}}.
+PANR:the argument \code{pheno} of the object of \code{\link[PANR:BetaMixture]{BetaMixture}}.
 
 'nodeSumCols' and 'nodeSumMethod' - these two arguments are used to scale
 the colors of nodes by phenotypes. The former argument is a numeric vector
-specifying the columns in slot \code{pheno} of the object of class \code{\link[PAN:BetaMixture]{BetaMixture}};
+specifying the columns in slot \code{pheno} of the object of class \code{\link[PANR:BetaMixture]{BetaMixture}};
 while the latter one is a character value giving the method to summarize
 these columns of phenotypes: either 'mean' or 'median'.
 

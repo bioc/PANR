@@ -37,7 +37,7 @@ This function fits a beta-mixture model to functional gene associations
 using the Expectation-Maximization algorithm. The function allows various
 parameter settings to perform fitting by the original (if model='global')
 or stratified (if model='stratified') beta-mixture model (the model should
-be specified when creating a new object of \code{\link[PAN:BetaMixture]{BetaMixture}}).
+be specified when creating a new object of \code{\link[PANR:BetaMixture]{BetaMixture}}).
 
 The initial values of the beta distributions can be set by \code{thetaInit},
 is a numeric vector including the two shape parameters for the '-'
@@ -45,7 +45,7 @@ is a numeric vector including the two shape parameters for the '-'
 if \code{ctrl$NULL} is \code{TRUE}, meaning that the NULL distribution
 has already been fitted, then \code{para$alphaNULL} and \code{para$betaNULL}
 are supposed to be filled in the estimated NULL parameters by the function
-\code{\link[PAN:fitNULL]{fitNULL}}).
+\code{\link[PANR:fitNULL]{fitNULL}}).
 
 \code{zInit} is a matrix of posterior probabilities for gene associations
 following the three mixture components. 
@@ -75,7 +75,7 @@ screens, in preparation.
 Xin Wang \email{xw264@cam.ac.uk}
 }
 \seealso{
-  \code{\link[PAN:fitNULL]{fitNULL}}
+  \code{\link[PANR:fitNULL]{fitNULL}}
 }
 \examples{
 \dontrun{

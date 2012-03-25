@@ -38,8 +38,8 @@ not in use, but only for further extension.
 This function presents the searched enriched functional modules in \code{\link[RedeR:RedeR]{RedeR}} 
 - a bioconductor package for network visualization.
 
-Please note that the user is expected to run \code{\link[PAN:buildPAN]{buildPAN}} to build a 
-graph and search modules using \code{\link[PAN:pvclustModule]{pvclustModule}} prior to visualize using 
+Please note that the user is expected to run \code{\link[PANR:buildPAN]{buildPAN}} to build a 
+graph and search modules using \code{\link[PANR:pvclustModule]{pvclustModule}} prior to visualize using 
 this function.
 
 Please also note that if `RedeR' is selected as the graphics engine, it is 
@@ -57,7 +57,7 @@ screens, in preparation.
 Xin Wang \email{xw264@cam.ac.uk}
 }
 \seealso{
-  \code{\link[RedeR:addGraph]{addGraph}}, \code{\link[RedeR:nestNodes]{nestNodes}}, \code{\link[PAN:viewPAN]{viewPAN}}, \code{\link[PAN:buildPAN]{buildPAN}}
+  \code{\link[RedeR:addGraph]{addGraph}}, \code{\link[RedeR:nestNodes]{nestNodes}}, \code{\link[PANR:viewPAN]{viewPAN}}, \code{\link[PANR:buildPAN]{buildPAN}}
 }
 
 \examples{
