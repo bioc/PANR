@@ -365,7 +365,7 @@ setMethod(
 					(pis[2]*dbeta(x.h, shape1=theta[3], shape2=theta[4]))
 				rslt<-data.frame(pval=pval, q_lower=x.l, q_upper=x.h, 
 					SNR_lower=snr.l, SNR_upper=snr.h)
-			} else if(object@model=="global") {
+			} else if(object@model=="stratified") {
 				snr.l<-(pis[, 1]*dbeta(x.l, shape1=theta[1], shape2=theta[2])+
 					pis[, 3]*dbeta(x.l, shape1=theta[5], shape2=theta[6]))/
 					(pis[, 2]*dbeta(x.l, shape1=theta[3], shape2=theta[4]))
@@ -411,7 +411,7 @@ setMethod(
 					log.p = FALSE)	
 				rslt<-data.frame(SNR=SNR, q_lower=q.l, q_upper=q.h, p_lower=p.l, 
 					p_upper=p.h)
-			} else if(object@model=="global") {
+			} else if(object@model=="stratified") {
 				q.l<-c(suppressWarnings(nlm(f=function(x) {
 					abs(SNR-dbm2(x, 0, 0.5, 1))}, p=0.01)$estimate), 
 					suppressWarnings(nlm(f=function(x) {
