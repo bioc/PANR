@@ -14,6 +14,14 @@ setGeneric("fitBM",
 			ctrl=list(fitNULL=FALSE, tol=1e-3, maxIter=NULL), verbose=TRUE, ...) 
 		standardGeneric("fitBM"), 
 package="PANR")
+setGeneric("p2SNR", 
+	function(object, pval, ...) 
+		standardGeneric("p2SNR"), 
+package="PANR")
+setGeneric("SNR2p", 
+	function(object, SNR, ...) 
+		standardGeneric("SNR2p"), 
+package="PANR")
 setGeneric("infer", 
 	function(object, para=list(type="SNR", log=TRUE, 
 			sign=TRUE, cutoff=0), filter=FALSE, verbose=TRUE, ...) 

@@ -70,6 +70,12 @@ below for details).
 		fit the functional association scores computed from input screens
 		to a three-beta mixture model.
 		}
+		\item{\code{p2SNR}}{
+		Translate p-values to Signal-to-Noise Ratios.
+		}
+		\item{\code{SNR2p}}{
+		Translate Signal-to-Noise Ratios to p-values.
+		}
 		\item{\code{view}}{
 		view the fitting results (a histogram of the original data and
 		fitted probability density curves) for NULL and real data.
@@ -82,10 +88,9 @@ below for details).
 }
 \author{Xin Wang \email{xw264@cam.ac.uk}}
 \references{
-Xin Wang, Roland F. Schwarz, Mauro Castro, Klaas W. Mulder 
-and Florian Markowetz, Posterior association networks and enriched 
-functional gene modules inferred from rich phenotypic perturbation 
-screens, in preparation.
+Xin Wang, Mauro Castro, Klaas W. Mulder and Florian Markowetz, Posterior 
+association networks and enriched functional gene modules inferred from 
+rich phenotypic perturbation screens, in preparation.
 }
 \seealso{
   \code{\link[PANR:permNULL]{permNULL}}

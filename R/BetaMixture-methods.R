@@ -345,6 +345,94 @@ setMethod(
 			object
 		}
 )
+##translate p-value to SNR
+setMethod(
+		"p2SNR",
+		c("BetaMixture", "numeric_Or_integer"),
+		function(object, pval, ...) {
+			theta<-object@result$fitBM$theta
+			pis<-object@result$fitBM$pi
+			x.l<-qbeta(p=pval, shape1=theta[3], shape2=theta[4], 
+				lower.tail = TRUE, log.p = FALSE)
+			x.h<-qbeta(p=pval, shape1=theta[3], shape2=theta[4], 
+				lower.tail = FALSE, log.p = FALSE)
+			if(object@model=="global") {
+				snr.l<-(pis[1]*dbeta(x.l, shape1=theta[1], shape2=theta[2])+
+					pis[3]*dbeta(x.l, shape1=theta[5], shape2=theta[6]))/
+					(pis[2]*dbeta(x.l, shape1=theta[3], shape2=theta[4]))
+				snr.h<-(pis[1]*dbeta(x.h, shape1=theta[1], shape2=theta[2])+
+					pis[3]*dbeta(x.h, shape1=theta[5], shape2=theta[6]))/
+					(pis[2]*dbeta(x.h, shape1=theta[3], shape2=theta[4]))
+				rslt<-data.frame(pval=pval, q_lower=x.l, q_upper=x.h, 
+					SNR_lower=snr.l, SNR_upper=snr.h)
+			} else if(object@model=="global") {
+				snr.l<-(pis[, 1]*dbeta(x.l, shape1=theta[1], shape2=theta[2])+
+					pis[, 3]*dbeta(x.l, shape1=theta[5], shape2=theta[6]))/
+					(pis[, 2]*dbeta(x.l, shape1=theta[3], shape2=theta[4]))
+				snr.h<-(pis[, 1]*dbeta(x.h, shape1=theta[1], shape2=theta[2])+
+					pis[, 3]*dbeta(x.h, shape1=theta[5], shape2=theta[6]))/
+					(pis[, 2]*dbeta(x.h, shape1=theta[3], shape2=theta[4]))		
+				rslt<-data.frame(pval=rep(pval, 2), q_lower=rep(x.l, 2), 
+					q_upper=rep(x.h, 2), SNR_lower=snr.l, SNR_upper=snr.h)		
+			}
+			print(rslt)
+			invisible(rslt)
+		}
+)
+##translate SNR to p-value
+setMethod(
+		"SNR2p",
+		c("BetaMixture", "numeric_Or_integer"),
+		function(object, SNR, ...) {
+			theta<-object@result$fitBM$theta
+			pis<-object@result$fitBM$pi
+			dbm<-function(x, lb, ub) {
+				if(x<lb || x>ub) return(Inf)
+				else 
+				(pis[, 1]*dbeta(x, shape1=theta[1], shape2=theta[2])+
+					pis[, 3]*dbeta(x, shape1=theta[5], shape2=theta[6]))/
+					(pis[, 2]*dbeta(x, shape1=theta[3], shape2=theta[4]))
+			}
+			dbm2<-function(x, lb, ub, g=1) {
+				if(x<lb || x>ub) return(Inf)
+				else 
+				(pis[g, 1]*dbeta(x, shape1=theta[1], shape2=theta[2])+
+					pis[g, 3]*dbeta(x, shape1=theta[5], shape2=theta[6]))/
+					(pis[g, 2]*dbeta(x, shape1=theta[3], shape2=theta[4]))
+			}
+			if(object@model=="global") {
+				q.l<-suppressWarnings(nlm(f=function(x) {
+					abs(SNR-dbm(x, 0, 0.5))}, p=0.01)$estimate)
+				q.h<-suppressWarnings(nlm(f=function(x) {
+					abs(SNR-dbm(x, 0.5, 1))}, p=0.99)$estimate)
+				p.l<-pbeta(q=q.l, shape1=theta[3], shape2=theta[4], lower.tail = TRUE, 
+					log.p = FALSE)	
+				p.h<-pbeta(q=q.h, shape1=theta[3], shape2=theta[4], lower.tail = FALSE, 
+					log.p = FALSE)	
+				rslt<-data.frame(SNR=SNR, q_lower=q.l, q_upper=q.h, p_lower=p.l, 
+					p_upper=p.h)
+			} else if(object@model=="global") {
+				q.l<-c(suppressWarnings(nlm(f=function(x) {
+					abs(SNR-dbm2(x, 0, 0.5, 1))}, p=0.01)$estimate), 
+					suppressWarnings(nlm(f=function(x) {
+					abs(SNR-dbm2(x, 0, 0.5, 2))}, p=0.01)$estimate)
+					)
+				q.h<-c(suppressWarnings(nlm(f=function(x) {
+					abs(SNR-dbm2(x, 0.5, 1, 1))}, p=0.99)$estimate), 
+					suppressWarnings(nlm(f=function(x) {
+					abs(SNR-dbm2(x, 0.5, 1, 2))}, p=0.99)$estimate)
+					)
+				p.l<-pbeta(q=q.l, shape1=theta[3], shape2=theta[4], lower.tail = TRUE, 
+					log.p = FALSE)	
+				p.h<-pbeta(q=q.h, shape1=theta[3], shape2=theta[4], lower.tail = FALSE, 
+					log.p = FALSE)			
+				rslt<-data.frame(SNR=SNR, q_lower=q.l, q_upper=q.h, p_lower=p.l, 
+					p_upper=p.h)	
+			}
+			print(rslt)
+			invisible(rslt)
+		}
+)
 ##BM density function
 #setMethod(
 #		"pdensity",

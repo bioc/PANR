@@ -47,10 +47,9 @@ by pvclust and obtain their ids, which can be subsequently used for visualizatio
 a numeric vector of ids for significant gene modules
 }
 \references{
-Xin Wang, Roland F. Schwarz, Mauro Castro, Klaas W. Mulder 
-and Florian Markowetz, Posterior association networks and enriched 
-functional gene modules inferred from rich phenotypic perturbation 
-screens, in preparation.
+Xin Wang, Mauro Castro, Klaas W. Mulder and Florian Markowetz, Posterior 
+association networks and enriched functional gene modules inferred from 
+rich phenotypic perturbation screens, in preparation.
 
 R. Suzuki and H. Shimodaira. Pvclust: an r package for assessing the
 uncertainty in hierarchical clustering. Bioinformatics, 22(12):1540, 2006.
