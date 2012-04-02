@@ -28,10 +28,9 @@ a matrix of permuted data.
 \code{\link[PANR:fitNULL]{fitNULL}}, \code{\link[PANR:fitBM]{fitBM}}, \code{\link[PANR:BetaMixture]{BetaMixture}}
 }
 \references{
-Xin Wang, Roland F. Schwarz, Mauro Castro, Klaas W. Mulder 
-and Florian Markowetz, Posterior association networks and enriched 
-functional gene modules inferred from rich phenotypic perturbation 
-screens, in preparation.
+Xin Wang, Mauro Castro, Klaas W. Mulder and Florian Markowetz, Posterior 
+association networks and enriched functional gene modules inferred from 
+rich phenotypic perturbation screens, in preparation.
 }
 \author{
 Xin Wang \email{xw264@cam.ac.uk}

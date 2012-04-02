@@ -54,10 +54,9 @@ This function will return an object of class \code{PAN} with inferred PAN
 updated in slot 'graph'.
 }
 \references{
-Xin Wang, Roland F. Schwarz, Mauro Castro, Klaas W. Mulder 
-and Florian Markowetz, Posterior association networks and enriched 
-functional gene modules inferred from rich phenotypic perturbation 
-screens, in preparation.
+Xin Wang, Mauro Castro, Klaas W. Mulder and Florian Markowetz, Posterior 
+association networks and enriched functional gene modules inferred from 
+rich phenotypic perturbation screens, in preparation.
 }
 \author{
 Xin Wang \email{xw264@cam.ac.uk}

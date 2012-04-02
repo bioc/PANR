@@ -39,10 +39,9 @@ posterior probability odds or posterior probabilities are preferred.
 This function will return a numeric adjacency matrix of edge weights.
 }
 \references{
-Xin Wang, Roland F. Schwarz, Mauro Castro, Klaas W. Mulder 
-and Florian Markowetz, Posterior association networks and enriched 
-functional gene modules inferred from rich phenotypic perturbation 
-screens, in preparation.
+Xin Wang, Mauro Castro, Klaas W. Mulder and Florian Markowetz, Posterior 
+association networks and enriched functional gene modules inferred from 
+rich phenotypic perturbation screens, in preparation.
 }
 \author{
 Xin Wang \email{xw264@cam.ac.uk}

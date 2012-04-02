@@ -38,6 +38,8 @@ exportMethods(
 	"permNULL",
 	"fitNULL",
 	"fitBM",
+	"p2SNR",
+	"SNR2p",
 	"infer",
 	"view",
 	"summarize",
