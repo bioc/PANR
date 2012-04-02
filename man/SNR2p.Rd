@@ -1,6 +1,6 @@
 \name{SNR2p}
 \alias{SNR2p}
-\alias{SNR2p,BetaMixture,numeric_Or_integer}
+\alias{SNR2p,BetaMixture,numeric_Or_integer-method}
 \title{
 Translate p-values to Signal-to-Noise Ratios
 }
