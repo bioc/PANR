@@ -1,6 +1,6 @@
 \name{p2SNR}
 \alias{p2SNR}
-\alias{p2SNR,BetaMixture,numeric_Or_integer}
+\alias{p2SNR,BetaMixture,numeric_Or_integer-method}
 \title{
 Translate p-values to Signal-to-Noise Ratios
 }
