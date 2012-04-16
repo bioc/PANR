@@ -401,10 +401,26 @@ setMethod(
 					(pis[g, 2]*dbeta(x, shape1=theta[3], shape2=theta[4]))
 			}
 			if(object@model=="global") {
-				q.l<-suppressWarnings(nlm(f=function(x) {
-					abs(SNR-dbm(x, 0, 0.5))}, p=0.01)$estimate)
-				q.h<-suppressWarnings(nlm(f=function(x) {
-					abs(SNR-dbm(x, 0.5, 1))}, p=0.99)$estimate)
+				q.l<-NULL
+				while(is.null(q.l)) {
+					tryCatch(
+					{
+						q.l<-suppressWarnings(nlm(f=function(x) {
+							abs(SNR-dbm(x, 0, 0.5))}, p=runif(1, 0, 0.1))$estimate)
+					},
+					error=function(e) {NULL}
+					)
+				}
+				q.h<-NULL
+				while(is.null(q.h)) {
+					tryCatch(
+					{
+						q.h<-suppressWarnings(nlm(f=function(x) {
+							abs(SNR-dbm(x, 0.5, 1))}, p=1-runif(1, 0, 0.1))$estimate)
+					},
+					error=function(e) {NULL}
+					)
+				}			
 				p.l<-pbeta(q=q.l, shape1=theta[3], shape2=theta[4], lower.tail = TRUE, 
 					log.p = FALSE)	
 				p.h<-pbeta(q=q.h, shape1=theta[3], shape2=theta[4], lower.tail = FALSE, 
@@ -412,16 +428,32 @@ setMethod(
 				rslt<-data.frame(SNR=SNR, q_lower=q.l, q_upper=q.h, p_lower=p.l, 
 					p_upper=p.h)
 			} else if(object@model=="stratified") {
-				q.l<-c(suppressWarnings(nlm(f=function(x) {
-					abs(SNR-dbm2(x, 0, 0.5, 1))}, p=0.01)$estimate), 
-					suppressWarnings(nlm(f=function(x) {
-					abs(SNR-dbm2(x, 0, 0.5, 2))}, p=0.01)$estimate)
+				q.l<-NULL
+				while(is.null(q.l)) {
+					tryCatch(
+					{
+					q.l<-c(suppressWarnings(nlm(f=function(x) {
+						abs(SNR-dbm2(x, 0, 0.5, 1))}, p=runif(1, 0, 0.1))$estimate), 
+						suppressWarnings(nlm(f=function(x) {
+						abs(SNR-dbm2(x, 0, 0.5, 2))}, p=runif(1, 0, 0.1))$estimate)
+						)
+					},
+					error=function(e) {NULL}
 					)
-				q.h<-c(suppressWarnings(nlm(f=function(x) {
-					abs(SNR-dbm2(x, 0.5, 1, 1))}, p=0.99)$estimate), 
-					suppressWarnings(nlm(f=function(x) {
-					abs(SNR-dbm2(x, 0.5, 1, 2))}, p=0.99)$estimate)
+				}
+				q.h<-NULL
+				while(is.null(q.h)) {
+					tryCatch(
+					{
+					q.h<-c(suppressWarnings(nlm(f=function(x) {
+						abs(SNR-dbm2(x, 0.5, 1, 1))}, p=1-runif(1, 0, 0.1))$estimate), 
+						suppressWarnings(nlm(f=function(x) {
+						abs(SNR-dbm2(x, 0.5, 1, 2))}, p=1-runif(1, 0, 0.1))$estimate)
 					)
+					},
+					error=function(e) {NULL}
+					)
+				}			
 				p.l<-pbeta(q=q.l, shape1=theta[3], shape2=theta[4], lower.tail = TRUE, 
 					log.p = FALSE)	
 				p.h<-pbeta(q=q.h, shape1=theta[3], shape2=theta[4], lower.tail = FALSE, 
