@@ -76,7 +76,7 @@ buildGraph4PAN<-function(pan, ig, engine, para) {
 	E(ig)$name<-paste("l", 1:length(E(ig)$weight),sep="")
 	##A. edge width
 	if(is.null(para$edgeWidth))
-		ig.edgeWidth<-panEdgeWidthScale(E(ig)$weight, minv=default.edge.width.min, maxv=default.edge.width.max)
+		ig.edgeWidth<-panEdgeWidthScale(abs(E(ig)$weight), minv=default.edge.width.min, maxv=default.edge.width.max)
 	else 
 		ig.edgeWidth<-para$edgeWidth
 	##B. edge color
@@ -113,7 +113,7 @@ buildGraph4PAN<-function(pan, ig, engine, para) {
 			seq(min(nodePheno[nodePheno>0]), max(nodePheno[nodePheno>0]), by=(max(nodePheno[nodePheno>0])-min(nodePheno[nodePheno>0]))/10))
 	legd$nodeColor<-data.frame(zscore=min2maxig.zscore, color=panNodeColScale(min2maxig.zscore,neg.col=default.node.low.col, pos.col=default.node.high.col,sep.col="#FFFFFF"))
 	##edge width
-	min2maxig.SNR<-seq(min(E(ig)$weight), max(E(ig)$weight), by=(max(E(ig)$weight)-min(E(ig)$weight))/9)
+	min2maxig.SNR<-seq(min(abs(E(ig)$weight)), max(abs(E(ig)$weight)), by=(max(abs(E(ig)$weight))-min(abs(E(ig)$weight)))/9)
 	legd$edgeWidth<-data.frame(SNR=min2maxig.SNR, width=panEdgeWidthScale(min2maxig.SNR, minv=default.edge.width.min, maxv=default.edge.width.max))
 	return(list(graph=ig, legend=legd))
 }
