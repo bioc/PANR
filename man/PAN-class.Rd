@@ -41,7 +41,7 @@ bm2)} (see the example below for details).
 		\code{\link[PANR:pvclustModule]{pvclustModule}}.
 		}
 		\item{\code{iPAN}:}{
-		an igraph object for storing the inferred PAN.
+		an igraph0 object for storing the inferred PAN.
 		}
 		\item{\code{legend}:}{
 		a list of legends for built PAN graph.
@@ -82,11 +82,11 @@ bm2)} (see the example below for details).
 		clustering (more details in \code{\link[PANR:viewNestedModules]{viewNestedModules}}).
 		}
 		\item{\code{viewPAN}}{
-		view the inferred PAN or modules in \code{\link[igraph:igraph]{igraph}} or \code{\link[RedeR:RedeR]{RedeR}} (more 
+		view the inferred PAN or modules in \code{\link[igraph0:igraph]{igraph}} or \code{\link[RedeR:RedeR]{RedeR}} (more 
 		details in \code{\link[PANR:viewPAN]{viewPAN}}).
 		}
 		\item{\code{buildPAN}}{
-		build a PAN graph for visualization in \code{\link[igraph:igraph]{igraph}} or \code{\link[RedeR:RedeR]{RedeR}}
+		build a PAN graph for visualization in \code{\link[igraph0:igraph]{igraph}} or \code{\link[RedeR:RedeR]{RedeR}}
 		(more details in \code{\link[PANR:viewPAN]{viewPAN}}).
 		}
 		\item{\code{viewLegend}}{

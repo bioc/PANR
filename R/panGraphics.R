@@ -28,9 +28,9 @@ panEdgeWidthScale<-function(x, minv=2, maxv=10) {
 #########################2. build a RedeR graph from igraph###################
 buildGraph4PAN<-function(pan, ig, engine, para) {
 	#####################1. default settings for graph attributes################
-	default.node.label.size<-ifelse(engine=="igraph", 10, 15)
-	default.node.size.min<-ifelse(engine=="igraph", 5, 10)
-	default.node.size.max<-ifelse(engine=="igraph", 20, 40)
+	default.node.label.size<-ifelse(engine=="igraph0", 10, 15)
+	default.node.size.min<-ifelse(engine=="igraph0", 5, 10)
+	default.node.size.max<-ifelse(engine=="igraph0", 20, 40)
 	default.node.col<-gray(0.7)
 #			default.node.low.col<-rgb(red=0, green=0, blue=139, maxColorValue=255)
 #			default.node.high.col<-rgb(red=139, green=0, blue=0, maxColorValue=255)
@@ -38,7 +38,7 @@ buildGraph4PAN<-function(pan, ig, engine, para) {
 	default.node.high.col<-colorRampPalette(c(colors()[99], colors()[99]))(1)
 	default.node.sep.col<-"#FFFFFF"
 	default.edge.width.min<-1
-	default.edge.width.max<-ifelse(engine=="igraph", 5, 15)
+	default.edge.width.max<-ifelse(engine=="igraph0", 5, 15)
 	default.edge.col<-gray(0.7)
 #			default.edge.low.col<-rgb(red=0, green=139, blue=0, maxColorValue=255)
 #			default.edge.high.col<-rgb(red=255, green=64, blue=64, maxColorValue=255)
@@ -57,7 +57,7 @@ buildGraph4PAN<-function(pan, ig, engine, para) {
 		stop("PAN-error: no other summarization method supported\n")
 	#############################(1) Node##################################
 	###A. node size
-	ig.deg<-igraph::degree(ig, v=V(ig), mode = c("all"), loops = FALSE)			##compute degrees of nodes
+	ig.deg<-igraph0::degree(ig, v=V(ig), mode = c("all"), loops = FALSE)			##compute degrees of nodes
 	if(is.null(para$nodeSize)) 
 		ig.nodeSize<-panNodeSizeScale(ig.deg, minv=default.node.size.min, maxv=default.node.size.max)
 	else 
@@ -88,7 +88,7 @@ buildGraph4PAN<-function(pan, ig, engine, para) {
 		ig.edgeColor<-para$edgeColor
 	}		
 	##assign to igraph
-	if(engine=="igraph") {
+	if(engine=="igraph0") {
 		V(ig)$size<-ig.nodeSize
 		V(ig)$color<-ig.nodeColor
 		V(ig)$frame.color<-ig.nodeLineColor

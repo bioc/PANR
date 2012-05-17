@@ -2,11 +2,11 @@
 \alias{viewPAN}
 \alias{viewPAN,PAN,character_Or_missing,numeric_Or_integer_Or_missing,character_Or_missing,logical_Or_missing-method}
 \title{
-Show posterior association networks or modules in `igraph' or `RedeR'
+Show posterior association networks or modules in `igraph0' or `RedeR'
 }
 \description{
 The function display inferred posterior association networks or enriched
-functional gene modules in igraph or a powerful graphical visualization
+functional gene modules in igraph0 or a powerful graphical visualization
 software \code{\link[RedeR:RedeR]{RedeR}}.
 }
 \usage{
@@ -25,8 +25,8 @@ a numeric or integer vector of modules to view (see details in \code{\link[PANR:
 This argument will be applied only when what=`pvclustModule'.
 }
 	\item{layout}{
-a character value specifying the layout method (see details in \code{\link[igraph:layout]{layout}}).
-This argument will be applied only when engine=`igraph' when build a graph
+a character value specifying the layout method (see details in \code{\link[igraph0:layout]{layout}}).
+This argument will be applied only when engine=`igraph0' when build a graph
 for PAN using \code{\link[PANR:buildPAN]{buildPAN}}.
 }
 	\item{verbose}{
@@ -39,13 +39,13 @@ not in use, but only for further extension.
 }
 \details{
 This function presents the inferred posterior association network or enriched 
-functional modules in igraph or \code{\link[RedeR:RedeR]{RedeR}} depending on the graphics
+functional modules in igraph0 or \code{\link[RedeR:RedeR]{RedeR}} depending on the graphics
 engine used when building the graph for PAN (details in \code{\link[PANR:buildPAN]{buildPAN}}).
 
-Please note that when viewing a dense PAN in `igraph', it could be very
+Please note that when viewing a dense PAN in `igraph0', it could be very
 messy. Multiple modules can be viewed at the same time in `RedeR' powered
 by its feature of `containers', which are used to group gene modules. When
-view multiple modules in `igraph', 
+view multiple modules in `igraph0', 
 
 }
 \references{
@@ -57,7 +57,7 @@ rich phenotypic perturbation screens, in preparation.
 Xin Wang \email{xw264@cam.ac.uk}
 }
 \seealso{
-  \code{\link[PANR:buildPAN]{buildPAN}}, \code{\link[igraph:layout]{layout}}
+  \code{\link[PANR:buildPAN]{buildPAN}}, \code{\link[igraph0:layout]{layout}}
 }
 
 \examples{
@@ -67,7 +67,7 @@ pan<-new("PAN", bm1=bm1)
 pan<-infer(pan, para=list(type="SNR", log=TRUE, sign=TRUE, cutoff=log(5)),
 filter=FALSE, verbose=TRUE)
 data(Bakal2007Cluster, package="PANR")
-pan<-buildPAN(pan, engine="igraph", para=list(nodeColor=nodeColor, 
+pan<-buildPAN(pan, engine="igraph0", para=list(nodeColor=nodeColor, 
 hideNeg=TRUE), verbose=TRUE)
 ##view inferred PAN
 viewPAN(pan, what='graph', layout="layout.fruchterman.reingold")	

@@ -1,11 +1,11 @@
 Package: PANR
 Type: Package
 Title: Posterior association networks and functional modules inferred from rich phenotypes of gene perturbations
-Version: 1.2.1
-Date: 2012-04-02
+Version: 1.2.2
+Date: 2012-05-17
 Author: Xin Wang <Xin.Wang@cancer.org.uk>
 Maintainer: Xin Wang <Xin.Wang@cancer.org.uk>
-Imports: graphics, grDevices, igraph, MASS, methods, pvclust, stats, utils
+Imports: graphics, grDevices, igraph0, MASS, methods, pvclust, stats, utils
 Depends: R (>= 2.14)
 Suggests: snow, RedeR
 Description: This package provides S4 classes and methods for inferring functional gene networks with edges encoding posterior beliefs of gene association types and nodes encoding perturbation effects.  

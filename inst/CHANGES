@@ -1,3 +1,5 @@
+05-17-2012
+switch function dependencies on igraph to igraph0 
 04-02-2012
 -Two functions added to make translation between SNR and p-values
 03-20-2012
@@ -6,3 +8,4 @@
 -changed the format of figures for the vignette from pdf to png to reduce the size of the package 
 01-12-2011
 -revised references in help files
+

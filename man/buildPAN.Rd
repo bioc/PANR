@@ -2,14 +2,14 @@
 \alias{buildPAN}
 \alias{buildPAN,PAN,character_Or_missing,list_Or_missing,logical_Or_missing-method}
 \title{
-Build an igraph or RedeR graph for PAN
+Build an igraph0 or RedeR graph for PAN
 }
 \description{
 The function builds a graph for the inferred PAN so that it can be visualize 
-in \code{\link[igraph:igraph]{igraph}} or \code{\link[RedeR:RedeR]{RedeR}}
+in \code{\link[igraph0:igraph]{igraph}} or \code{\link[RedeR:RedeR]{RedeR}}
 }
 \usage{
-buildPAN(object, engine="igraph", para=list(nodeColor=NULL, nodeSize=NULL, 
+buildPAN(object, engine="igraph0", para=list(nodeColor=NULL, nodeSize=NULL, 
 edgeWidth=NULL, edgeColor=NULL, nodeSumCols=1, nodeSumMethod="none", 
 hideNeg=TRUE), verbose=TRUE, ...)
 }
@@ -18,7 +18,7 @@ hideNeg=TRUE), verbose=TRUE, ...)
 an object of S4 class \code{PAN}.
 }
 	\item{engine}{
-a character value specifying which graphics engine to use: `igraph' or `RedeR'.
+a character value specifying which graphics engine to use: `igraph0' or `RedeR'.
 }
 	\item{para}{
 a list of parameters specifying graph attributes (see details)
@@ -80,7 +80,7 @@ pan<-new("PAN", bm1=bm1)
 pan<-infer(pan, para=list(type="SNR", log=TRUE, sign=TRUE, cutoff=log(5)),
 filter=FALSE, verbose=TRUE)
 data(Bakal2007Cluster, package="PANR")
-pan<-buildPAN(pan, engine="igraph", para=list(nodeColor=nodeColor, 
+pan<-buildPAN(pan, engine="igraph0", para=list(nodeColor=nodeColor, 
 hideNeg=TRUE), verbose=TRUE)
 }
 
