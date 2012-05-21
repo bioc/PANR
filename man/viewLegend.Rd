@@ -33,7 +33,7 @@ pan<-new("PAN", bm1=bm1)
 pan<-infer(pan, para=list(type="SNR", log=TRUE, sign=TRUE, cutoff=log(5)),
 filter=FALSE, verbose=TRUE)
 data(Bakal2007Cluster, package="PANR")
-pan<-buildPAN(pan, engine="igraph0", para=list(nodeColor=nodeColor, 
+pan<-buildPAN(pan, engine="igraph", para=list(nodeColor=nodeColor, 
 hideNeg=TRUE), verbose=TRUE)
 viewLegend(pan, "edgeWidth")
 }

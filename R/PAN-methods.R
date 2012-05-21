@@ -254,7 +254,7 @@ setMethod(
 		c("PAN", "character_Or_missing", "character_Or_missing", "numeric_Or_integer_Or_missing", "character_Or_missing", "logical_Or_missing"),
 		function(object, file="pan", what="graph", moduleID=1, format="gml", verbose=TRUE, ...) {
 			if(is.null(object@iPAN))
-				stop("PAN-error: please build igraph0 first using 'buildPANGraph'")
+				stop("PAN-error: please build igraph first using 'buildPANGraph'")
 			########################0. check validity of arguments ######################
 			##A. check 'what'
 			if(!what%in%c("graph", "pvclustModule"))
@@ -269,7 +269,7 @@ setMethod(
 			if(verbose)
 				cat(paste("-exporting ", ifelse(what=='graph', "a PAN", "PAN modules"), " ...\n",sep=""))
 			if(what=="graph") {
-				igraph0::write.graph(object@iPAN, file=paste(file, ".", format,sep=""), format=format)
+				igraph::write.graph(object@iPAN, file=paste(file, ".", format,sep=""), format=format)
 			} else if(what=="pvclustModule") {
 				##reorder according to pval
 				sigmodulesWithInRange<-object@modules$clusters[moduleID]
@@ -277,7 +277,7 @@ setMethod(
 				##write tables
 				for(mod in 1:length(sigmodulesWithInRange)) {
 					sub.ig<-subgraph(object@iPAN, sigmodulesWithInRange[[mod]])
-					igraph0::write.graph(sub.ig, file=paste(file, "_module", mod, "(",format(sigmodulesPval[mod], digits=3, nsmall=2, scientific=TRUE), ").", format,sep=""), format=format)
+					igraph::write.graph(sub.ig, file=paste(file, "_module", mod, "(",format(sigmodulesPval[mod], digits=3, nsmall=2, scientific=TRUE), ").", format,sep=""), format=format)
 				}
 			}
 			if(verbose)
@@ -313,7 +313,7 @@ setMethod(
 		c("PAN", "numeric_Or_integer_Or_missing", "numeric_Or_integer_Or_missing", "numeric_Or_integer_Or_missing", "logical_Or_missing"),
 		function(object, pValCutoff=0.01, minSize=3, maxSize=100, verbose=TRUE, ...) {
 			if(is.null(object@iPAN))
-				stop("PAN-error: please build igraph0 first using 'buildPANGraph'")
+				stop("PAN-error: please build igraph first using 'buildPANGraph'")
 			if(object@engine!="RedeR")
 				stop("PAN-error: the current version can only view the nested modules in 'RedeR'")
 			##		
@@ -380,7 +380,7 @@ setMethod(
 		c("PAN", "character_Or_missing", "numeric_Or_integer_Or_missing", "character_Or_missing", "logical_Or_missing"),
 		function(object, what="graph", moduleID=1, layout="layout.fruchterman.reingold", verbose=TRUE, ...) {
 			if(is.null(object@iPAN))
-				stop("PAN-error: please build igraph0 first using 'buildPANGraph'")
+				stop("PAN-error: please build igraph first using 'buildPANGraph'")
 			########################0. check validity of arguments ######################
 			##A. check 'what'
 			if(!what%in%c("graph", "pvclustModule"))
@@ -389,8 +389,8 @@ setMethod(
 			if(what=="pvclustModule" &&(any(moduleID<0) || any(moduleID>length(object@modules$clusters))))
 				stop(paste("PAN-error: 'moduleID' should be >0 and <", length(object@modules$clusters), sep=""))
 			##C.
-			if(object@engine=="igraph0" && what=="pvclustModule" && length(moduleID)>1)
-				warning("PAN-warning: multiple modules can only be viewed one after another in 'igraph0' in the current version!")
+			if(object@engine=="igraph" && what=="pvclustModule" && length(moduleID)>1)
+				warning("PAN-warning: multiple modules can only be viewed one after another in 'igraph' in the current version!")
 			########################1. view graph in selected engine#####################
 			pval.formatted<-format(object@modules$pval[moduleID], digits=3, nsmall=2, scientific=TRUE)
 			if(object@engine=="RedeR") {
@@ -431,7 +431,7 @@ setMethod(
 						addGraph(rdp, sub.ig, gscale=25, layout=eval(parse(text=paste(layout,"(sub.ig)",sep=""))))
 					}
 				}
-			} else if(object@engine=="igraph0") {
+			} else if(object@engine=="igraph") {
 				if(what=="graph")
 					plot.igraph(object@iPAN, layout=eval(parse(text=layout)))
 				else if(what=="pvclustModule") {
@@ -449,12 +449,12 @@ setMethod(
 setMethod(
 		"buildPAN",
 		c("PAN", "character_Or_missing", "list_Or_missing", "logical_Or_missing"),
-		function(object, engine="igraph0", para=list(nodeColor=NULL, nodeSize=NULL, edgeWidth=NULL, edgeColor=NULL, 
+		function(object, engine="igraph", para=list(nodeColor=NULL, nodeSize=NULL, edgeWidth=NULL, edgeColor=NULL, 
 						nodeSumCols=1, nodeSumMethod="none", hideNeg=TRUE), verbose=TRUE, ...) {
 			########################0. check validity of arguments ######################
 			##A. check 'engine'
-			if(!engine%in%c("igraph0", "RedeR"))
-				stop("PAN-error: 'engine' should be either 'igraph0' or 'RedeR'")
+			if(!engine%in%c("igraph", "RedeR"))
+				stop("PAN-error: 'engine' should be either 'igraph' or 'RedeR'")
 			##B. check 'para'
 			para0=list(nodeSumCols=1, nodeSumMethod="none", hideNeg=TRUE)
 			moreparas<-setdiff(names(para0), names(para))

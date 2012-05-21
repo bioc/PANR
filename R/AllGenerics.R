@@ -61,7 +61,7 @@ setGeneric("viewLegend",
 			standardGeneric("viewLegend"), 
 		package="PANR")
 setGeneric("buildPAN", 
-		function(object, engine="igraph0", para=list(nodeColor=NULL, nodeSize=NULL, edgeWidth=NULL, edgeColor=NULL, 
+		function(object, engine="igraph", para=list(nodeColor=NULL, nodeSize=NULL, edgeWidth=NULL, edgeColor=NULL, 
 						nodeSumCols=1, nodeSumMethod="none", hideNeg=TRUE), verbose=TRUE, ...)
 			standardGeneric("buildPAN"), 
 		package="PANR")

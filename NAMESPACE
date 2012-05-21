@@ -7,7 +7,7 @@ importFrom(graphics, axis, box, hist, image, layout, lines, mtext, par,
 
 importFrom(grDevices, colorRampPalette, colors, gray)
 
-importFrom(igraph0, E, "E<-", graph.adjacency, layout.random,
+importFrom(igraph, E, "E<-", graph.adjacency, layout.random,
            plot.igraph, subgraph, V, "V<-")
 
 importFrom(MASS, fitdistr)

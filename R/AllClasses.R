@@ -46,7 +46,7 @@ setClass(
 				edgeWt=matrix(),
 				graph=matrix(),
 				modules=list(),
-				iPAN=igraph0::graph.empty(),
+				iPAN=igraph::graph.empty(),
 				legend=list(),
 				engine="RedeR",
 				summary=list()
