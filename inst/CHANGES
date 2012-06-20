@@ -1,3 +1,5 @@
+06-20-2012
+-add dependency to igraph to resolve a problem when initiating the PAN class
 04-02-2012
 -Two functions added to make translation between SNR and p-values
 03-20-2012
