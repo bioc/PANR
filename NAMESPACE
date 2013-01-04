@@ -12,7 +12,7 @@ importFrom(igraph, E, "E<-", graph.adjacency, layout.random, graph.empty,
 
 importFrom(MASS, fitdistr)
 
-importFrom(methods, "@<-", is)
+importFrom(methods, is)
 importClassesFrom(methods, className, namedList, listOfMethods,
 ObjectsWithPackage, signature) 
 
