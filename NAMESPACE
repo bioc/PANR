@@ -1,6 +1,4 @@
-importClassesFrom(methods, character, list, oldClass)
-
-importMethodsFrom(methods, initialize, show)
+import(methods)
 
 importFrom(graphics, axis, box, hist, image, layout, lines, mtext, par,
            plot, plot.new, plot.window, polygon, title)
@@ -11,10 +9,6 @@ importFrom(igraph, E, "E<-", graph.adjacency, layout.random, graph.empty,
            plot.igraph, subgraph, V, "V<-")
 
 importFrom(MASS, fitdistr)
-
-importFrom(methods, is)
-importClassesFrom(methods, className, namedList, listOfMethods,
-ObjectsWithPackage, signature) 
 
 importFrom(pvclust, pvclust)
 
