@@ -2,7 +2,7 @@ Package: PANR
 Type: Package
 Title: Posterior association networks and functional modules inferred
         from rich phenotypes of gene perturbations
-Version: 1.51.0
+Version: 1.52.0
 Date: 2012-06-20
 Author: Xin Wang <xin_wang@hms.harvard.edu>
 Maintainer: Xin Wang <xin_wang@hms.harvard.edu>
